@@ -19,7 +19,7 @@ interface IClubNFT {
 
     /// @notice emitted when a club is created
     /// @param clubId ID of the club created
-    event ClubCreated(uint256 clubId);
+    event ClubClaimed(uint256 clubId);
 
     /// @notice emitted when a new join request is created
     /// @param clubId ID of the club requested to join
@@ -56,11 +56,18 @@ interface IClubNFT {
         uint16 ownersShare;
     }
 
-    /// @notice Create a club, this will mint a club NFT.
-    /// @param ownerShare owner's share of the earnings.
-    /// @param minDuration minimum duration of days a member
-    ///        must stay in the club
-    function createClub(uint16 ownerShare, uint16 minDuration) external;
+    /// @notice Create a club, this will mint a club NFT
+    /// @param amount number of clubs wanted to be claimed
+    /// @param maxAmount maximum number of clubs allowed to be claimed
+    /// @param merkleProof array of node hashes used to generate proof
+    /// @dev Emits a ClubClaimed event
+    /// @dev the node leaf is created from hash of the concatenation of
+    ///      the msg.sender and the maximum amount
+    function claimClub(
+        uint256 amount,
+        uint256 maxAmount,
+        bytes32[] calldata merkleProof
+    ) external;
 
     /// @notice To join the club, a NFT owner or a borrower can call this function.
     /// @dev Emits a JoinRequest event.
