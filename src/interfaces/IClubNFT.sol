@@ -44,7 +44,7 @@ interface IClubNFT {
     struct Club {
         /// @notice array of token IDs
         uint256[] members;
-        /// @notice
+        /// @notice array of club join requests
         uint256[] joinRequests;
         /// @notice all payments must be send to the payment receiver
         address paymentReceiver;
@@ -69,37 +69,37 @@ interface IClubNFT {
         bytes32[] calldata merkleProof
     ) external;
 
-    /// @notice To join the club, a NFT owner or a borrower can call this function.
-    /// @dev Emits a JoinRequest event.
-    /// @param clubId ID of the club.
+    /// @notice To join the club, a NFT owner or a borrower can call this function
+    /// @dev Emits a JoinRequest event
+    /// @param clubId ID of the club
     /// @param tokenId ID of the NFT that is going to join the club
     function requestJoin(uint256 clubId, uint256 tokenId) external;
 
     /// @notice Accept join request
     /// @dev Emits a JoinRequestAccepted event
-    /// @param clubId ID of the club.
+    /// @param clubId ID of the club
     /// @param tokenId ID of the NFT to determinate join request
     function acceptJoin(uint256 clubId, uint256 tokenId) external;
 
     /// @notice Reject join request
     /// @dev Emits a JoinRequestRejected event
-    /// @param clubId ID of the club.
+    /// @param clubId ID of the club
     /// @param tokenId ID of the NFT to determinate join request
     function rejectJoin(uint256 clubId, uint256 tokenId) external;
 
     /// @notice Leave the Club
     /// @dev Emits a ClubLeft event
-    /// @param clubId ID of the club.
+    /// @param clubId ID of the club
     /// @param tokenId ID of the NFT that will leave the club
     function leaveClub(uint256 clubId, uint256 tokenId) external;
 
     /// @notice claim club rewards for members
-    /// @param clubId ID of the club.
+    /// @param clubId ID of the club
     /// @param tokenId ID of the NFT used to claim rewards
     function claimRewards(uint256 clubId, uint256 tokenId) external;
 
     /// @notice claim club rewards for club owners
-    /// @param clubId ID of the club.
+    /// @param clubId ID of the club
     function claimRewards(uint256 clubId) external;
 }
 
