@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-interface IClubNFT {
+interface IClub {
     /// @notice revert if club reaches maximum capacity
     error ClubFull();
 
@@ -113,7 +113,7 @@ interface IClubNFT {
  * 88     `8b  88     "88,  88
  * 88      `8b 88       Y8b 88888888888
  *
- * IClubNFT.sol
+ * IClub.sol
  *
  * MIT License
  * ===========
