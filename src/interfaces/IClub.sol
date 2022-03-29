@@ -23,34 +23,41 @@ interface IClub {
 
     /// @notice emitted when a new join request is created
     /// @param clubId ID of the club requested to join
-    /// @param tokenId ID of the NFT used to request join
-    event JoinRequest(uint256 clubId, uint256 tokenId);
+    /// @param member who requested to join
+    event JoinRequest(uint256 clubId, Member member);
 
     /// @notice emitted when join request is accepted
     /// @param clubId ID of the club requested to join
-    /// @param tokenId ID of the NFT used to request join
-    event JoinRequestAccepted(uint256 clubId, uint256 tokenId);
+    /// @param member who got accepted in the club
+    event JoinRequestAccepted(uint256 clubId, Member member);
 
     /// @notice emitted when join request is rejected
     /// @param clubId ID of the club requested to join
-    /// @param tokenId ID of the NFT used to request join
-    event JoinRequestRejected(uint256 clubId, uint256 tokenId);
+    /// @param member who got rejected
+    event JoinRequestRejected(uint256 clubId, Member member);
 
     /// @notice emitted when a member leaves the club
     /// @param clubId ID of the club left
-    /// @param tokenId ID of the NFT that left the club
-    event ClubLeft(uint256 clubId, uint256 tokenId);
+    /// @param member who left the club
+    event ClubLeft(uint256 clubId, Member member);
+
+    struct Member {
+        /// @notice address of the NFT collection
+        address nft;
+        /// @notice ID of the NFT
+        uint256 tokenId;
+    }
 
     struct Club {
-        /// @notice array of token IDs
-        uint256[] members;
-        /// @notice array of club join requests
-        uint256[] joinRequests;
+        /// @notice array of members
+        Member[] members;
+        /// @notice array of join requests
+        Member[] joinRequests;
         /// @notice all payments must be send to the payment receiver
         address paymentReceiver;
         /// @notice minimum duration of days a member must stay
         uint16 minDuration;
-        /// @notice owner's share of the earnings.
+        /// @notice owner's share of the earnings
         /// @dev percentage with 2 decimals, multiplied by 100
         ///      Ex: 100% = 10000 / 35.85% = 3585
         uint16 ownersShare;
@@ -72,31 +79,31 @@ interface IClub {
     /// @notice To join the club, a NFT owner or a borrower can call this function
     /// @dev Emits a JoinRequest event
     /// @param clubId ID of the club
-    /// @param tokenId ID of the NFT that is going to join the club
-    function requestJoin(uint256 clubId, uint256 tokenId) external;
+    /// @param member willing to join the club
+    function requestJoin(uint256 clubId, Member calldata member) external;
 
     /// @notice Accept join request
     /// @dev Emits a JoinRequestAccepted event
     /// @param clubId ID of the club
-    /// @param tokenId ID of the NFT to determinate join request
-    function acceptJoin(uint256 clubId, uint256 tokenId) external;
+    /// @param member who accepted in the club
+    function acceptJoin(uint256 clubId, Member calldata member) external;
 
     /// @notice Reject join request
     /// @dev Emits a JoinRequestRejected event
     /// @param clubId ID of the club
-    /// @param tokenId ID of the NFT to determinate join request
-    function rejectJoin(uint256 clubId, uint256 tokenId) external;
+    /// @param member who is going to be rejected
+    function rejectJoin(uint256 clubId, Member calldata member) external;
 
     /// @notice Leave the Club
     /// @dev Emits a ClubLeft event
     /// @param clubId ID of the club
-    /// @param tokenId ID of the NFT that will leave the club
-    function leaveClub(uint256 clubId, uint256 tokenId) external;
+    /// @param member who is going to leave the club
+    function leaveClub(uint256 clubId, Member calldata member) external;
 
     /// @notice claim club rewards for members
     /// @param clubId ID of the club
-    /// @param tokenId ID of the NFT used to claim rewards
-    function claimRewards(uint256 clubId, uint256 tokenId) external;
+    /// @param member willing to claim rewards
+    function claimRewards(uint256 clubId, Member calldata member) external;
 
     /// @notice claim club rewards for club owners
     /// @param clubId ID of the club
