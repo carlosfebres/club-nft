@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 interface IClub {
     /// @notice revert if club reaches maximum capacity
     error ClubFull();
@@ -17,6 +19,24 @@ interface IClub {
     /// @notice revert if member tries to leave club before minimum time
     error NotMinTime();
 
+    /// @notice revert if merkle proof is invalid
+    error InvalidProof();
+
+    /// @notice revert if msg.sender has mint all clubs
+    error NoMintLeft();
+
+    /// @notice revert if msg.sender is not the NFT owner
+    error NoNFTOwner();
+
+    /// @notice revert if msg.sender is not the club owner
+    error NoClubOwner();
+
+    /// @notice revert if NFT is already a member
+    error MemberNotAvailable();
+
+    /// @notice revert if the join request is not longer avaible
+    error NoJoinRequest();
+
     /// @notice emitted when a club is created
     /// @param clubId ID of the club created
     event ClubClaimed(uint256 clubId);
@@ -26,35 +46,53 @@ interface IClub {
     /// @param member who requested to join
     event JoinRequest(uint256 clubId, Member member);
 
-    /// @notice emitted when join request is accepted
+    /// @notice emitted when a join request is accepted
     /// @param clubId ID of the club requested to join
     /// @param member who got accepted in the club
     event JoinRequestAccepted(uint256 clubId, Member member);
 
-    /// @notice emitted when join request is rejected
+    /// @notice emitted when a join request is rejected
     /// @param clubId ID of the club requested to join
-    /// @param member who got rejected
-    event JoinRequestRejected(uint256 clubId, Member member);
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    event JoinRequestRejected(uint256 clubId, address nft, uint256 tokenId);
+
+    /// @notice emitted when a join request is canceled
+    /// @param clubId ID of the club requested to join
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    event JoinRequestCanceled(uint256 clubId, address nft, uint256 tokenId);
 
     /// @notice emitted when a member leaves the club
     /// @param clubId ID of the club left
-    /// @param member who left the club
-    event ClubLeft(uint256 clubId, Member member);
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    event MemberLeft(uint256 clubId, address nft, uint256 tokenId);
+
+    /// @notice emitted whem merkle root is updated
+    /// @param merkleRoot new merkle root
+    event MerkleRootUpdated(bytes32 merkleRoot);
 
     struct Member {
         /// @notice address of the NFT collection
         address nft;
         /// @notice ID of the NFT
         uint256 tokenId;
+        /// @notice owner of the NFT
+        address owner;
+        /// @notice joinTimestamp timestamp when member joined a club
+        uint256 joinTimestamp;
     }
 
     struct Club {
         /// @notice array of members
-        Member[] members;
+        EnumerableSet.Bytes32Set members;
         /// @notice array of join requests
-        Member[] joinRequests;
+        EnumerableSet.Bytes32Set joinRequests;
         /// @notice all payments must be send to the payment receiver
         address paymentReceiver;
+        /// @notice maximun number of members
+        uint16 maxCapacity;
         /// @notice minimum duration of days a member must stay
         uint16 minDuration;
         /// @notice owner's share of the earnings
@@ -79,26 +117,57 @@ interface IClub {
     /// @notice To join the club, a NFT owner or a borrower can call this function
     /// @dev Emits a JoinRequest event
     /// @param clubId ID of the club
-    /// @param member willing to join the club
-    function requestJoin(uint256 clubId, Member calldata member) external;
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    function requestJoin(
+        uint256 clubId,
+        address nft,
+        uint256 tokenId
+    ) external;
 
     /// @notice Accept join request
     /// @dev Emits a JoinRequestAccepted event
     /// @param clubId ID of the club
-    /// @param member who accepted in the club
-    function acceptJoin(uint256 clubId, Member calldata member) external;
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    function acceptJoin(
+        uint256 clubId,
+        address nft,
+        uint256 tokenId
+    ) external;
 
     /// @notice Reject join request
     /// @dev Emits a JoinRequestRejected event
     /// @param clubId ID of the club
-    /// @param member who is going to be rejected
-    function rejectJoin(uint256 clubId, Member calldata member) external;
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    function rejectJoin(
+        uint256 clubId,
+        address nft,
+        uint256 tokenId
+    ) external;
+
+    /// @notice Cancel join request
+    /// @dev Emits a JoinRequestRejected event
+    /// @param clubId ID of the club
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    function cancelJoin(
+        uint256 clubId,
+        address nft,
+        uint256 tokenId
+    ) external;
 
     /// @notice Leave the Club
     /// @dev Emits a ClubLeft event
     /// @param clubId ID of the club
-    /// @param member who is going to leave the club
-    function leaveClub(uint256 clubId, Member calldata member) external;
+    /// @param nft address of the NFT collection
+    /// @param tokenId ID of the token
+    function leaveClub(
+        uint256 clubId,
+        address nft,
+        uint256 tokenId
+    ) external;
 
     /// @notice claim club rewards for members
     /// @param clubId ID of the club
